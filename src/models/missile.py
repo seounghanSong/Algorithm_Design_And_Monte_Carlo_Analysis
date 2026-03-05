@@ -12,6 +12,13 @@ class Missile3D(DynamicModel):
 
         self.acc_cmd = np.zeros(3)
 
+        # 중력/공력 추가를 위한 물리 파라미터
+        self.mass = 100.0
+        self.Cd = 0.5
+        self.A = 0.03
+        self.rho = 1.225
+        self.g = np.array([0, 0, -9.81])
+
     @property
     def pos(self):
         return self.state[0:3]
@@ -26,7 +33,35 @@ class Missile3D(DynamicModel):
 
     def derivative(self, state):
         x, y, z, vx, vy, vz = state
-        ax, ay, az = self.acc_cmd
+
+        # -----------------
+        # PN acceleration
+        # -----------------
+        a_pn = self.acc_cmd
+
+        # -----------------
+        # Gravity(중력)
+        # -----------------
+        a_gravity = self.g
+
+        # -----------------
+        # Drag(공)
+        # -----------------
+        v = np.array([vx, vy, vz])
+
+        v_norm = np.linalg.norm(v)
+
+        if v_norm > 1e-6:
+            drag = -0.5 * self.rho * self.Cd * self.A * v_norm * v / self.mass
+        else:
+            drag = np.zeros(3)
+
+        # -----------------
+        # Total acceleration
+        # -----------------
+        a_total = a_pn + a_gravity + drag
+
+        ax, ay, az = a_total
 
         return np.array([
             vx, vy, vz,
