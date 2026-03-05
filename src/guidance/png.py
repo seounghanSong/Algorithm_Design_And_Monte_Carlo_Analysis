@@ -19,7 +19,6 @@ class ProportionalNavigation(GuidanceLaw):
 
         # LOS(Line-Of-Sight) 각속도(λ) 계산
         lambda_dot = (rel_pos[0]*rel_vel[1] - rel_pos[1]*rel_vel[0]) / r**2
-        print(lambda_dot)
 
         # 상대 속도 계산
         closing_vel = -np.dot(rel_pos, rel_vel) / r

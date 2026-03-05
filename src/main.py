@@ -17,9 +17,13 @@ def run_simulation(N):
     config = Config()
     config.navigation_gain = N
 
+    # # models(missile/target) 객체 생성
+    # missile = Missile2D([0, 0], [300, 0])
+    # target = Target2D([5000, 1000], [250, 0])
+
     # models(missile/target) 객체 생성
     missile = Missile2D([0, 0], [300, 0])
-    target = Target2D([5000, 1000], [250, 0])
+    target = Target2D([5000, 2000], [0, -200])
 
     # guidance/control 객체 생성
     guidance = ProportionalNavigation(config.navigation_gain)
