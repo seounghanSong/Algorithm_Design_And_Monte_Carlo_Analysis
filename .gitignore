@@ -1,0 +1,5 @@
+# .DS_Store 파일 무시
+*.DS_Store
+
+# .pyc 파일 무시
+*.pyc
