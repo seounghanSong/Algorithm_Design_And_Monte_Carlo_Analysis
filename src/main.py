@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from config import Config
 from simulation import Simulation
 
-from models.missile import Missile2D
-from models.target import Target2D
+from models.missile import Missile3D
+from models.target import Target3D
 
-from guidance.png import ProportionalNavigation
+from guidance.png import ProportionalNavigation3D
 from control.ideal_controller import IdealAccelerationController
 from analysis.metrics import compute_miss_distance
 
@@ -18,11 +18,11 @@ def run_simulation(N):
     config.navigation_gain = N
 
     # models(missile/target) 객체 생성
-    missile = Missile2D([0, 0], [300, 0])
-    target = Target2D([5000, 2000], [0, -200])
+    missile = Missile3D([0, 0, 0], [300, 0, 0])
+    target = Target3D([5000, 2000, 1000], [0, -200, 0])
 
     # guidance/control 객체 생성
-    guidance = ProportionalNavigation(config.navigation_gain)
+    guidance = ProportionalNavigation3D(config.navigation_gain)
     controller = IdealAccelerationController()
 
     # 시뮬레이션 실행

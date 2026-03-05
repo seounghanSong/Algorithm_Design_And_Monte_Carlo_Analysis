@@ -2,32 +2,32 @@ import numpy as np
 from .base import DynamicModel
 
 # 표적 동역학 전파 역할
-class Target2D(DynamicModel):
+class Target3D(DynamicModel):
     # 표적의 초기 위치/속도 초기화
     def __init__(self, position, velocity):
+        # 상태: [x, y, z, vx, vy, vz]
         self.state = np.array([
-            position[0], position[1],
-            velocity[0], velocity[1]
+            position[0], position[1], position[2],
+            velocity[0], velocity[1], velocity[2]
         ], dtype=float)
 
     @property
     def pos(self):
-        return self.state[0:2]
+        return self.state[0:3]
 
     @property
     def vel(self):
-        return self.state[2:4]
+        return self.state[3:6]
 
-    # 등속 운동 모델을 가정한 위치 업데이트
+    # 등속 운동: 가속도 = 0
     def derivative(self, state):
-        x, y, vx, vy = state
+        x, y, z, vx, vy, vz = state
         return np.array([
-            vx,
-            vy,
-            0.0,
-            0.0
+            vx, vy, vz,
+            0.0, 0.0, 0.0
         ])
 
+    # RK4 적분
     def step(self, dt):
         s = self.state
 
