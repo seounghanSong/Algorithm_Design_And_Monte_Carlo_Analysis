@@ -227,7 +227,7 @@ src/
 
 - 결과 해석: Dt(0.005)에서 곡선이 아닌 직선적인 방향 전환이 관측됨
 
-![exp05](assets/result/exp05/Figure_2.png)
+![exp05](assets/result/exp05/Figure_4.png)
 
 | Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) | PNG(Tune_3) | PNG(Tune_4) | PNG(Tune_5) |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -238,4 +238,17 @@ src/
 | **적분 함수** | RK4 | RK4 | RK4 | RK4 | RK4 | RK4 |
 | **MissDistance** | 11.43 | **0.00(⇣)** | **0.00(⇣)** | **0.00(⇣)** | **0.00(⇣)** | **0.00(⇣)** |
 
-- 결과 해석: 환경만 변경한 것(해석 필요X)
+- 결과 해석: 3-DOF point-mass 유도기 완성
+
+![exp05](assets/result/exp05/Figure_5.png)
+
+| Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) | PNG(Tune_3) | PNG(Tune_4) | PNG(Tune_5) |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Dt** | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 |
+| **TotalTime** | 20.0 | 20.0 | 20.0 | 20.0 | 20.0 | 20.0 |
+| **NavigationGain** | 1.0 | 2.0 | 3.0 | 4.0 | 5.0 | 6.0 |
+| **Vel(Missile(X),Target(Y))**| (300, -200) | (300, -200) | (300, -200) | (300, -200) | (300, -200) | (300, -200) |
+| **적분 함수** | RK4 | RK4 | RK4 | RK4 | RK4 | RK4 |
+| **MissDistance** | 160.80 | **4.56(⇣)** | **1.04** | **1.30(⇣)** | **1.33(⇣)** | **1.63(⇣)** |
+
+- 결과 해석: 이상적 3-DOF point-mass 유도기 완성

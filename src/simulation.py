@@ -1,3 +1,5 @@
+import numpy as np
+
 # 전체 시스템 통합을 위한 엔진
 class Simulation:
     # 미사일, 표적, 유도기, 제어기, 설정 등의 객체 저장 및 궤적 기록용 history 딕셔너리 생성
@@ -28,6 +30,10 @@ class Simulation:
 
             # 표적 동역학 전파
             self.target.step(self.config.dt)
+
+            # 요격 판정시 조기 종료
+            if np.linalg.norm(self.missile.pos - self.target.pos) < 1.0:
+                break
 
             # 미사일/타겟 상태 기록
             self.history["missile"].append(self.missile.pos.copy())

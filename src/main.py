@@ -22,7 +22,7 @@ def run_simulation(N):
     target = Target3D([5000, 2000, 1000], [0, -200, 0])
 
     # guidance/control 객체 생성
-    guidance = ProportionalNavigation3D(config.navigation_gain)
+    guidance = ProportionalNavigation3D(config.navigation_gain, config.max_acceleration)
     controller = IdealAccelerationController()
 
     # 시뮬레이션 실행
@@ -38,7 +38,7 @@ def run_simulation(N):
     return missile_traj, target_traj, miss_distance
 
 def main():
-    gains = [3]
+    gains = [1, 2, 3, 4, 5, 6]
     results = []
 
     plt.figure(figsize=(8,6))
