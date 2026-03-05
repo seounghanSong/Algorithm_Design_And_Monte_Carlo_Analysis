@@ -172,7 +172,7 @@ src/
 ![exp04](assets/result/exp04/Figure_31.png)
 
 | Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) |
-| --- | --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- |
 | **Dt** | 0.02 | 0.01 | 0.005 |
 | **TotalTime** | 20.0 | 20.0 | 20.0 |
 | **NavigationGain** | 3.0 | 3.0 | 3.0 |
