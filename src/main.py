@@ -17,10 +17,6 @@ def run_simulation(N):
     config = Config()
     config.navigation_gain = N
 
-    # # models(missile/target) 객체 생성
-    # missile = Missile2D([0, 0], [300, 0])
-    # target = Target2D([5000, 1000], [250, 0])
-
     # models(missile/target) 객체 생성
     missile = Missile2D([0, 0], [300, 0])
     target = Target2D([5000, 2000], [0, -200])
@@ -37,7 +33,7 @@ def run_simulation(N):
     missile_traj = np.array(history["missile"])
     target_traj = np.array(history["target"])
 
-    miss_distance = compute_miss_distance(missile_traj, target_traj)
+    miss_distance = compute_miss_distance(missile_traj, target_traj, config.dt)
 
     return missile_traj, target_traj, miss_distance
 
@@ -64,7 +60,7 @@ def main():
 
     print("=== Miss Distance Results ===")
     for N, miss in results:
-        print(f"N={N} → Miss Distance: {miss:.4f} m")
+        print(f"N={N} → Miss Distance: {miss:.2f} m")
 
 
 if __name__ == "__main__":
