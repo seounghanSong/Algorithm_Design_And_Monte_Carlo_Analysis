@@ -216,6 +216,19 @@ src/
 
 ![exp05](assets/result/exp05/Figure_1.png)
 
+| Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) |
+| --- | --- | --- | --- |
+| **Dt** | 0.02 | 0.01 | 0.005 |
+| **TotalTime** | 20.0 | 20.0 | 20.0 |
+| **NavigationGain** | 3.0 | 3.0 | 3.0 |
+| **Vel(Missile(X),Target(Y))**| (300, -200) | (300, -200) | (300, -200) | (300, -200) |
+| **적분 함수** | RK4 | RK4 | RK4 |
+| **MissDistance** | 0.00 | 0.00 | 0.00 |
+
+- 결과 해석: Dt(0.005)에서 곡선이 아닌 직선적인 방향 전환이 관측됨
+
+![exp05](assets/result/exp05/Figure_2.png)
+
 | Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) | PNG(Tune_3) | PNG(Tune_4) | PNG(Tune_5) |
 | --- | --- | --- | --- | --- | --- | --- |
 | **Dt** | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 |

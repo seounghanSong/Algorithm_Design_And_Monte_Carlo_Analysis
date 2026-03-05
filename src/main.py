@@ -38,7 +38,7 @@ def run_simulation(N):
     return missile_traj, target_traj, miss_distance
 
 def main():
-    gains = [1, 2, 3, 4, 5, 6]
+    gains = [3]
     results = []
 
     plt.figure(figsize=(8,6))
