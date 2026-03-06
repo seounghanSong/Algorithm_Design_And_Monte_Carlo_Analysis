@@ -259,7 +259,7 @@ src/
 - 이유: 기존 PN은 미사일 속도가 일정하고, 고도 변화가 없어 매우 이상적임 ⇢ 중력과 공력을 추가하여 현실적인 유도기 생성의 필요성有
 - 일시: 2026.03.06
 
-![exp05](assets/result/exp06/Figure_1.png)
+![exp06](assets/result/exp06/Figure_1.png)
 
 | Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) | PNG(Tune_3) | PNG(Tune_4) | PNG(Tune_5) |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -272,7 +272,7 @@ src/
 
 - 결과 해석: 총 시뮬레이션 시간의 부족이 요격 실패의 원인으로 판단
 
-![exp05](assets/result/exp06/Figure_2.png)
+![exp06](assets/result/exp06/Figure_2.png)
 
 | Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) | PNG(Tune_3) | PNG(Tune_4) | PNG(Tune_5) |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -291,7 +291,7 @@ src/
 - 이유: 기존 Controller는 가속도 명령과 실제 기체의 응답이 같아 매우 이상적임 ⇢ 현실적인 Autopilot 적용의 필요성有
 - 일시: 2026.03.06
 
-![exp05](assets/result/exp07/Figure_1.png)
+![exp07](assets/result/exp07/Figure_1.png)
 
 | Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) | PNG(Tune_3) | PNG(Tune_4) | PNG(Tune_5) |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -303,3 +303,7 @@ src/
 | **MissDistance** | 1715.62 | **1076.33(⇣)** | **917.41(⇣)** | **880.92(⇣)** | **869.86(⇣)** | **866.83(⇣)** |
 
 - 결과 해석: 요격 성공으로 이어지지는 않음 ⇢ 다만, 이는 현실적 제약을 추가한 것에 대한 정상적인 결과
+
+![exp07](assets/result/exp07/Figure_2.png)
+
+
