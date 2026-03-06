@@ -8,7 +8,7 @@ from models.missile import Missile3D
 from models.target import Target3D
 
 from guidance.png import ProportionalNavigation3D
-from control.ideal_controller import IdealAccelerationController
+from control.first_order_autopilot import FirstOrderAutopilot
 from analysis.metrics import compute_miss_distance
 
 
@@ -23,7 +23,7 @@ def run_simulation(N):
 
     # guidance/control 객체 생성
     guidance = ProportionalNavigation3D(config.navigation_gain, config.max_acceleration)
-    controller = IdealAccelerationController()
+    controller = FirstOrderAutopilot(tau=0.15)
 
     # 시뮬레이션 실행
     sim = Simulation(missile, target, guidance, controller, config)

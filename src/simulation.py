@@ -23,7 +23,7 @@ class Simulation:
             acc_cmd = self.guidance.compute_command(self.missile, self.target)
 
             # Controller 업데이트
-            self.controller.update(self.missile, acc_cmd)
+            self.controller.update(self.missile, acc_cmd, self.config.dt)
 
             # 미사일 동역학 전파
             self.missile.step(self.config.dt)
