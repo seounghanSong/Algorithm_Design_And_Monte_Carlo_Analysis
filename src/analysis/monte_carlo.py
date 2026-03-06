@@ -34,7 +34,7 @@ def run_single_simulation(config):
         config.max_acceleration,
     )
 
-    controller = FirstOrderAutopilot(tau=0.15)
+    controller = FirstOrderAutopilot(tau=0.1)
 
     sim = Simulation(missile, target, guidance, controller, config)
 

@@ -45,4 +45,7 @@ class ProportionalNavigation3D(GuidanceLaw):
             if a_norm > self.max_acc:
                 a_cmd = a_cmd * (self.max_acc / a_norm)
 
+        # gravity compensation
+        a_cmd[2] += 9.81
+
         return a_cmd

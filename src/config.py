@@ -3,10 +3,10 @@ class Config:
     dt = 0.01
 
     # 총 시뮬레이션 시간(s): 성능 판단의 타당성 확보를 위한 변수
-    total_time = 80.0
+    total_time = 30.0
 
     # 비례항법계수(N): Miss Distance 최소화를 위한 변수
     navigation_gain = 3.0
 
     # 최대 가속도 제한
-    max_acceleration = 40.0   # m/s^2 (예: 약 4g)
+    max_acceleration = 400.0   # m/s^2 (예: 약 30g)
