@@ -8,5 +8,5 @@ class Config:
     # 비례항법계수(N): Miss Distance 최소화를 위한 변수
     navigation_gain = 3.0
 
-    # 최대 가속도 제한
-    max_acceleration = 400.0   # m/s^2 (예: 약 30g)
+    # 최대 가속도 제한 m/s^2 (예: 약 40g)
+    max_acceleration = 400.0
