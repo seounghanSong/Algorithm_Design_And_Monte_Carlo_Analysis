@@ -377,16 +377,16 @@ src/
 
 ![exp08](assets/result/exp08/Figure_6.png)
 
-| Monte Carlo Result(with Fixed N) |
+| Monte Carlo Result(with Fixed N) | Tune_1 | Tune_2 | Tune_3 | Tune_4 | Tune_5 | Tune_6 |
 | --- | --- | --- | --- | --- | --- | --- |
 | **NavagationGain** | 1 | 2 | 3 | 4 | 5 | 6 |
 | **Runs** | 200 | 200 | 200 | 200 | 200 | 200 |
 | **Mean Miss Distance** | 991.73 | 646.90 | 516.15 | 542.32 | 499.45 | 493.13 |
 | **Std Miss Distance** | 358.13 | 345.82 | 387.93 | 394.11 | 369.99 | 409.57 |
-| **Median Miss** | 988.87 | 623.14 | 1314.51 | 453.93 | 513.21 | 452.74 | 427.08 |
-| **P95 Miss Distance** | 1594.73 | 1.04 | 1240.40 | 1188.17 | 1133.15 | 1231.87 |
-| **Min Miss Distance** | 169.56 | 1524.39 | 1.01 | 1.02 | 1.01 | 1.02 |
-| **Max Miss Distance** | 1893.47 | 1833.24 | 1663.70 | 1647.85 | 1992.27 |
+| **Median Miss** | 988.87 | 623.14 | 453.93 | 513.21 | 452.74 | 427.08 |
+| **P95 Miss Distance** | 1594.73 | 1524.39 | 1240.40 | 1188.17 | 1133.15 | 1231.87 |
+| **Min Miss Distance** | 169.56 | 1.04 | 1.01 | 1.02 | 1.01 | 1.02 |
+| **Max Miss Distance** | 1893.47 | 1833.24 | 1663.70 | 1647.85 | 1992.27 | - |
 | **Pk (<5m)** | 0.000 | 0.010 | 0.080 | 0.060 | 0.090 | 0.095 |
 | **Pk (<10m)** | 0.000 | 0.010 | 0.080 | 0.065 | 0.100 | 0.095 |
 | **Success Rate** | 0.000 | **0.010(⇡)** | **0.080(⇡)** | **0.060(⇡)** | **0.090(⇡)** | **0.095(⇡)** |
@@ -400,7 +400,7 @@ src/
 
 ![exp08](assets/result/exp08/Figure_9.png)
 
-| Monte Carlo Result(with Fixed tau) |
+| Monte Carlo Result(with Fixed tau) | Tune_1 | Tune_2 | Tune_3 | Tune_4 | Tune_5 |
 | --- | --- | --- | --- | --- | --- |
 | **Tau** | 0.02 | 0.04 | 0.06 | 0.08 | 0.10 |
 | **Runs** | 200 | 200 | 200 | 200 | 200 |
@@ -423,7 +423,7 @@ src/
 
 ![exp08](assets/result/exp08/Figure_12.png)
 
-| Monte Carlo Result(with Fixed max_acc) |
+| Monte Carlo Result(with Fixed max_acc) | Tune_1 | Tune_2 | Tune_3 | Tune_4 | Tune_5 |
 | --- | --- | --- | --- | --- | --- |
 | **MaxAcc** | 100 | 200 | 300 | 400 | 500 |
 | **Runs** | 200 | 200 | 200 | 200 | 200 |
@@ -439,3 +439,136 @@ src/
 | **Mean Intercept Time** | 29.72 | 29.82 | 29.37 | 29.69 | 29.62 |
 
 - 결과 해석: max_acc 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 max_acc(300)에서 가장 안정적인 요격 성능을 보임, 또한 N(navigation gain), tau(autopilot time constant), max_acc(maximum acceleration) 중 max_acc 변화에 따라 miss distance(직관적 성능 지표) 및 intercept probability(실무적 성능 지표) 값의 큰 변화가 있어 요격 성능에 가장 민감한 변수임을 알 수 있음
+
+#### [Exp09]: EKF(Extended Karman Filter) 적용
+
+- 목표: EKF 적용을 통한 모델의 현실성 향상
+- 이유: 기존의 PN은 미사일이 표적의 위치·속도를 정확히 알고 있다는 가정 하에 계산됨, 다만 현실에서는 표적의 위치·속도를 파악하기 위한 센서 측정값에 오차·노이즈가 존재함
+- 일시: 2026.03.08
+
+##### 현재 구조
+```
+true target state → guidance → control → dynamics
+```
+
+##### 변경 구조(단계1: Sensor Noise 추가)
+```
+true target state → sensor measurement(noise) → guidance → control → dynamics
+```
+
+![exp09](assets/result/exp09/Figure_1.png)
+
+![exp09](assets/result/exp09/Figure_2.png)
+
+![exp09](assets/result/exp09/Figure_3.png)
+
+| Monte Carlo Result(with Fixed position_noise) | Tune_1 | Tune_2 | Tune_3 | Tune_4 | Tune_5 | Tune_6 |
+| --- | --- | --- | --- | --- | --- | --- |
+| **PosNoise** | 0 | 0.5 | 1 | 2 | 5 | 10 |
+| **Runs** | 200 | 200 | 200 | 200 | 200 | 200 |
+| **Mean Miss Distance** | 562.76 | 519.25 | 580.80 | 589.33 | 552.78 | 541.39 |
+| **Std Miss Distance** | 383.15 | 358.21 | 389.53 | 380.88 | 372.81 | 346.05 |
+| **Median Miss** | 542.16 | 428.39 | 558.41 | 548.11 | 521.97 | 532.55 |
+| **P95 Miss Distance** | 1215.19 | 1146.24 | 1287.45 | 1256.59 | 1155.86 | 1126.60 |
+| **Min Miss Distance** | 0.99 | 1.03 | 1.02 | 1.03 | 1.14 | 1.31 |
+| **Max Miss Distance** | 1628.85 | 1552.31 | 2020.82 | 1830.12 | 1553.21 | 1904.74 |
+| **Pk (<5m)** | 0.040 | 0.035 | 0.050 | 0.045 | 0.045 | 0.035 |
+| **Pk (<10m)** | 0.045 | 0.040 | 0.050 | 0.045 | 0.045 | 0.045 |
+| **Success Rate** | 0.040 | 0.035(⇣) | **0.050(⇡)** | 0.045 | 0.045 | 0.035(⇣) |
+| **Mean Intercept Time** | 29.84 | 29.82 | 29.73 | 29.75 | 29.94 | 30.00 |
+
+- 결과 해석: positon_noise 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 positon_noise(1)에서 가장 안정적인 요격 성능을 보임
+
+![exp09](assets/result/exp09/Figure_4.png)
+
+![exp09](assets/result/exp09/Figure_5.png)
+
+![exp09](assets/result/exp09/Figure_6.png)
+
+| Monte Carlo Result(with Fixed velocity_noise) | Tune_1 | Tune_2 | Tune_3 | Tune_4 |
+| --- | --- | --- | --- | --- |
+| **VelNoise** | 0 | 0.2 | 0.5 | 1 |
+| **Runs** | 200 | 200 | 200 | 200 |
+| **Mean Miss Distance** | 538.02 | 581.97 | 546.04 | 516.28 |
+| **Std Miss Distance** | 326.81 | 371.03 | 382.44 | 374.40 |
+| **Median Miss** | 479.37 | 550.19 | 478.51 | 460.20 |
+| **P95 Miss Distance** | 1140.27 | 1210.78 | 1208.15 | 1194.80 |
+| **Min Miss Distance** | 0.97 | 1.03 | 1.00 | 1.04 |
+| **Max Miss Distance** | 1479.36 | 1634.46 | 1567.22 | 2053.76 |
+| **Pk (<5m)** | 0.030 | 0.035 | 0.045 | 0.040 |
+| **Pk (<10m)** | 0.045 | 0.035 | 0.060 | 0.055 |
+| **Success Rate** | 0.030 | **0.035(⇡)** | **0.045(⇡)** | **0.040(⇡)** |
+| **Mean Intercept Time** | 29.86 | 29.95 | 29.88 | 29.90 |
+
+- 결과 해석: velocity_noise 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 velocity_noise(0.5)에서 가장 안정적인 요격 성능을 보임
+
+##### 변경 구조(단계2: EKF 추가)
+```
+true target state → sensor measurement(noise) → EKF → estimated target → guidance → control → dynamics
+```
+
+![exp09](assets/result/exp09/Figure_12.png)
+
+![exp09](assets/result/exp09/Figure_13.png)
+
+| Monte Carlo Result(Complex) |
+| --- |
+| **Runs** | 500 |
+| **Mean Miss Distance** | 537.31 |
+| **Std Miss Distance** | 362.52 |
+| **Median Miss** | 511.36 |
+| **P95 Miss Distance** | 1199.54 |
+| **Min Miss Distance** | 1.00 |
+| **Max Miss Distance** | 1776.83 |
+| **Pk (<5m)** | 0.038 |
+| **Pk (<10m)** | 0.038 |
+| **Success Rate** | 0.038 |
+| **Mean Intercept Time** | 29.76 |
+
+- 결과 해석: (sensor noise + EKF 적용 후) 적용 전보다 요격 성공률이 낮아짐을 확인可
+
+![exp09](assets/result/exp09/Figure_14.png)
+
+![exp09](assets/result/exp09/Figure_15.png)
+
+![exp09](assets/result/exp09/Figure_16.png)
+
+| Monte Carlo Result(with Fixed ekf_q) | Tune_1 | Tune_2 | Tune_3 | Tune_4 | Tune_5 |
+| --- | --- | --- | --- | --- | --- |
+| **EKF(q)** | 0.1 | 0.5 | 1 | 2 | 5 |
+| **Runs** | 200 | 200 | 200 | 200 | 200 |
+| **Mean Miss Distance** | 574.96 | 527.27 | 541.35 | 520.31 | 535.86 |
+| **Std Miss Distance** | 382.47 | 347.36 | 379.34 | 345.63 | 353.64 |
+| **Median Miss** | 521.68 | 503.68 | 490.29 | 499.94 | 519.71 |
+| **P95 Miss Distance** | 1294.10 | 1149.49 | 1224.89 | 1102.07 | 1160.57 |
+| **Min Miss Distance** | 1.03 | 1.02 | 1.00 | 1.03 | 1.01 |
+| **Max Miss Distance** | 1611.22 | 1797.67 | 2031.13 | 1413.92 | 1684.30 |
+| **Pk (<5m)** | 0.035 | 0.045 | 0.060 | 0.060 | 0.045 |
+| **Pk (<10m)** | 0.035 | 0.045 | 0.060 | 0.060 | 0.045 |
+| **Success Rate** | 0.035 | **0.045(⇡)** | **0.060(⇡)** | **0.060(⇡)** | **0.045(⇡)** |
+| **Mean Intercept Time** | 29.90 | 29.80 | 29.67 | 29.71 | 29.79 |
+
+- 결과 해석: ekf_q 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 ekf_q(2)에서 가장 안정적인 요격 성능을 보임
+
+![exp09](assets/result/exp09/Figure_17.png)
+
+![exp09](assets/result/exp09/Figure_18.png)
+
+![exp09](assets/result/exp09/Figure_19.png)
+
+| Monte Carlo Result(with Fixed ekf_r) | Tune_1 | Tune_2 | Tune_3 | Tune_4 | Tune_5 |
+| --- | --- | --- | --- | --- | --- |
+| **EKF(r)** | 4 | 9 | 25 | 49 | 100 |
+| **Runs** | 200 | 200 | 200 | 200 | 200 |
+| **Mean Miss Distance** | 537.78 | 538.28 | 608.08 | 585.75 | 613.31 |
+| **Std Miss Distance** | 388.19 | 381.52 | 430.35 | 388.69 | 385.07 |
+| **Median Miss** | 496.00 | 503.58 | 512.30 | 575.76 | 570.52 |
+| **P95 Miss Distance** | 1265.13 | 1204.20 | 1388.32 | 1367.21 | 1259.89 |
+| **Min Miss Distance** | 1.01 | 1.02 | 1.00 | 1.01 | 1.07 |
+| **Max Miss Distance** | 1634.04 | 1610.61 | 1904.88 | 1811.83 | 1767.50 |
+| **Pk (<5m)** | 0.075 | 0.080 | 0.055 | 0.060 | 0.025 |
+| **Pk (<10m)** | 0.075 | 0.085 | 0.060 | 0.065 | 0.030 |
+| **Success Rate** | 0.075 | **0.080(⇡)** | 0.055(⇣) | 0.060(⇣) | 0.025(⇣) |
+| **Mean Intercept Time** | 29.68 | 29.45 | 29.71 | 29.64 | 29.89 |
+
+- 결과 해석: ekf_r 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 ekf_r(9)에서 가장 안정적인 요격 성능을 보임
