@@ -287,7 +287,7 @@ src/
 
 #### [Exp07]: 현실적 Autopilot으로의 확장
 
-- 목표: 현실적인 Autopilot(비행 제어) 적용
+- 목표: 현실적인 Autopilot(비행 제어) 및 Monte_Carlo 시뮬레이션 적용
 - 이유: 기존 Controller는 가속도 명령과 실제 기체의 응답이 같아 매우 이상적임 ⇢ 현실적인 Autopilot 적용의 필요성有
 - 일시: 2026.03.06
 
@@ -300,10 +300,136 @@ src/
 | **NavigationGain** | 1.0 | 2.0 | 3.0 | 4.0 | 5.0 | 6.0 |
 | **Vel(Missile(X),Target(Y))**| (300, -200) | (300, -200) | (300, -200) | (300, -200) | (300, -200) | (300, -200) |
 | **적분 함수** | RK4 | RK4 | RK4 | RK4 | RK4 | RK4 |
+| **Tau** | 0.15 | 0.15 | 0.15 | 0.15 | 0.15 | 0.15 |
 | **MissDistance** | 1715.62 | **1076.33(⇣)** | **917.41(⇣)** | **880.92(⇣)** | **869.86(⇣)** | **866.83(⇣)** |
 
 - 결과 해석: 요격 성공으로 이어지지는 않음 ⇢ 다만, 이는 현실적 제약을 추가한 것에 대한 정상적인 결과
 
-![exp07](assets/result/exp07/Figure_2.png)
+![exp07](assets/result/exp07/Figure_3.png)
 
+| Param | PNG(Base) | PNG(Tune_1) |
+| --- | --- | --- |
+| **Dt** | 0.01 | 0.005 |
+| **TotalTime** | 80.0 | 80.0 |
+| **NavigationGain** | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) |
+| **Simulation** | MonteCarlo(500) | MonteCarlo(500) |
+| **Tau** | 0.15 | 0.15 |
+| **MissDistance(Mean/Std)** | 894.13/349.35 | 933.27(⇡)/349.04(⇣) |
 
+- 결과 해석: dt 변경은 요격 성공률 향상에 큰 영향을 미치지 않음을 확인可 ⇢ NavigationGain(N) 변경에 따른 성능 변화 확인 필요성有
+
+![exp07](assets/result/exp07/Figure_4.png)
+
+| Param | PNG(Base) | PNG(Tune_1) |
+| --- | --- | --- |
+| **Dt** | 0.01 | 0.01 |
+| **TotalTime** | 80.0 | 80.0 |
+| **NavigationGain** | np.random.uniform(2.5, 4.5) | np.random.uniform(4.0, 6.0) |
+| **Simulation** | MonteCarlo(500) | MonteCarlo(500) |
+| **Tau** | 0.15 | 0.15 |
+| **MissDistance(Mean/Std)** | 894.13/349.35 | 873.88(⇣)/377.32(⇡) |
+
+- 결과 해석: NavigationGain(N)은 요격 성공률 향상에 큰 영향을 미치지 않음을 확인可 ⇢ 비행 시간과 최대 가속도 조정 및 중력 가속도 보상 필요성有
+
+![exp07](assets/result/exp07/Figure_6.png)
+
+| Param | PNG(Base) | PNG(Tune_1) | PNG(Tune_2) | PNG(Tune_3) | PNG(Tune_4) | PNG(Tune_5) | PNG(Tune_6) | PNG(Tune_7) | PNG(Tune_8) | PNG(Tune_9) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Dt** | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 |
+| **TotalTime** | 30.0 | 30.0 | 30.0 | 30.0 | 30.0 | 30.0 | 30.0 | 30.0 | 30.0 | 30.0 |
+| **NavigationGain** | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) | np.random.uniform(2.5, 4.5) |
+| **Simulation** | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) | MonteCarlo(500) |
+| **MaxAccl** | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 | 400 |
+| **Tau** | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 | 0.06 | 0.07 | 0.08 | 0.09 | 0.10 |
+| **MissDistance(Mean/Std)** | 519.61/338.80 | 526.06(⇡)/358.46(⇡) | 564.91(⇡)/349.71(⇡) | 518.25(⇣)/350.98(⇡) | 523.54(⇡)/333.40(⇣) | 525.21(⇡)/323.78(⇣) | 536.97(⇡)/342.21(⇡) | 511.26(⇣)/346.89(⇡) | 526.50(⇡)/353.68(⇡) | 533.43(⇡)/354.58(⇡) |
+
+- 결과 해석: (변수 변경 및 중력 가속도 보상처리 후) MissDistance가 감소함을 확인함, 다만 여전히 높은 수치를 보임
+
+#### [Exp08]: Monte Carlo 시뮬레이션 고도화
+
+- 목표: 현재의 '랜덤 반복 실행' 기반 Monte Carlo 시뮬레이션을 '불확실성' 기반 성능 강건성 분석으로 고도화
+- 이유: 기존 Monte Carlo 시뮬레이션은 ① 비현실적인 랜덤 변수 설계 ② 단일 성능 지표 사용 ③ 변수별 민감도 분석X ④ 단일(랜덤 분포) 시나리오 사용 ⑤ 모델의 현실성 부족 ⑥ 재현성 확보X의 문제점 존재
+- 일시: 2026.03.07
+
+![exp08](assets/result/exp08/Figure_2.png)
+
+![exp08](assets/result/exp08/Figure_3.png)
+
+| Monte Carlo Result(Complex) |
+| --- |
+| **Runs** | 500 |
+| **Mean Miss Distance** | 562.56 |
+| **Std Miss Distance** | 385.47 |
+| **Median Miss** | 532.19 |
+| **P95 Miss Distance** | 1281.60 |
+| **Min Miss Distance** | 1.00 |
+| **Max Miss Distance** | 1638.40 |
+| **Pk (<5m)** | 0.054 |
+| **Pk (<10m)** | 0.058 |
+| **Success Rate** | 0.054 |
+| **Mean Intercept Time** | 29.67 |
+
+- 결과 해석: 낮은 요격 성공률로 인해 시스템의 Robustness가 낮게 측정됨 ⇢ 각 변수가 결과에 미치는 영향을 독립적으로 파악할 필요有
+
+![exp08](assets/result/exp08/Figure_4.png)
+![exp08](assets/result/exp08/Figure_5.png)
+![exp08](assets/result/exp08/Figure_6.png)
+
+| Monte Carlo Result(with Fixed N) |
+| --- | --- | --- | --- | --- | --- | --- |
+| **NavagationGain** | 1 | 2 | 3 | 4 | 5 | 6 |
+| **Runs** | 200 | 200 | 200 | 200 | 200 | 200 |
+| **Mean Miss Distance** | 991.73 | 646.90 | 516.15 | 542.32 | 499.45 | 493.13 |
+| **Std Miss Distance** | 358.13 | 345.82 | 387.93 | 394.11 | 369.99 | 409.57 |
+| **Median Miss** | 988.87 | 623.14 | 1314.51 | 453.93 | 513.21 | 452.74 | 427.08 |
+| **P95 Miss Distance** | 1594.73 | 1.04 | 1240.40 | 1188.17 | 1133.15 | 1231.87 |
+| **Min Miss Distance** | 169.56 | 1524.39 | 1.01 | 1.02 | 1.01 | 1.02 |
+| **Max Miss Distance** | 1893.47 | 1833.24 | 1663.70 | 1647.85 | 1992.27 |
+| **Pk (<5m)** | 0.000 | 0.010 | 0.080 | 0.060 | 0.090 | 0.095 |
+| **Pk (<10m)** | 0.000 | 0.010 | 0.080 | 0.065 | 0.100 | 0.095 |
+| **Success Rate** | 0.000 | **0.010(⇡)** | **0.080(⇡)** | **0.060(⇡)** | **0.090(⇡)** | **0.095(⇡)** |
+| **Mean Intercept Time** | 30.00 | 29.96 | 29.48 | 29.67 | 29.51 | 29.50 |
+
+- 결과 해석: N 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 N(5)에서 가장 안정적인 요격 성능을 보임
+
+![exp08](assets/result/exp08/Figure_7.png)
+![exp08](assets/result/exp08/Figure_8.png)
+![exp08](assets/result/exp08/Figure_9.png)
+
+| Monte Carlo Result(with Fixed tau) |
+| --- | --- | --- | --- | --- | --- |
+| **Tau** | 0.02 | 0.04 | 0.06 | 0.08 | 0.10 |
+| **Runs** | 200 | 200 | 200 | 200 | 200 |
+| **Mean Miss Distance** | 608.87 | 554.90 | 501.23 | 554.43 | 528.64 |
+| **Std Miss Distance** | 386.87 | 366.75 | 392.35 | 387.36 | 354.11 |
+| **Median Miss** | 573.21 | 519.39 | 448.90 | 527.86 | 493.50 |
+| **P95 Miss Distance** | 1295.60 | 1283.48 | 1239.80 | 1183.85 | 1121.32 |
+| **Min Miss Distance** | 1.04 | 1.00 | 1.02 | 1.00 | 1.00 |
+| **Max Miss Distance** | 1646.62 | 1513.60 | 1832.43 | 1646.17 | 1589.85 |
+| **Pk (<5m)** | 0.050 | 0.035 | 0.090 | 0.055 | 0.060 |
+| **Pk (<10m)** | 0.050 | 0.045 | 0.090 | 0.055 | 0.060 |
+| **Success Rate** | 0.050 | 0.035(⇣) | **0.090(⇡)** | **0.055(⇡)** | **0.060(⇡)** |
+| **Mean Intercept Time** | 29.65 | 29.82 | 29.37 | 29.68 | 29.61 |
+
+- 결과 해석: tau 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 tau(0.06)에서 가장 안정적인 요격 성능을 보임
+
+![exp08](assets/result/exp08/Figure_10.png)
+![exp08](assets/result/exp08/Figure_11.png)
+![exp08](assets/result/exp08/Figure_12.png)
+
+| Monte Carlo Result(with Fixed max_acc) |
+| --- | --- | --- | --- | --- | --- |
+| **MaxAcc** | 100 | 200 | 300 | 400 | 500 |
+| **Runs** | 200 | 200 | 200 | 200 | 200 |
+| **Mean Miss Distance** | 604.10 | 553.58 | 502.34 | 558.14 | 534.64 |
+| **Std Miss Distance** | 385.68 | 366.46 | 392.67 | 388.18 | 355.60 |
+| **Median Miss** | 570.98 | 517.49 | 449.66 | 529.83 | 499.25 |
+| **P95 Miss Distance** | 1288.07 | 1281.60 | 1240.68 | 1187.27 | 1129.20 |
+| **Min Miss Distance** | 0.97 | 1.00 | 1.03 | 1.02 | 1.06 |
+| **Max Miss Distance** | 1638.40 | 1513.94 | 1835.14 | 1648.37 | 1597.26 |
+| **Pk (<5m)** | 0.050 | 0.040 | 0.090 | 1.02 | 0.060 |
+| **Pk (<10m)** | 0.055 | 0.045 | 0.090 | 0.055 | 0.060 |
+| **Success Rate** | 0.050 | 0.040(⇣) | **0.090(⇡)** | **0.055(⇡)** | **0.060(⇡)** |
+| **Mean Intercept Time** | 29.72 | 29.82 | 29.37 | 29.69 | 29.62 |
+
+- 결과 해석: max_acc 변화는 요격 성능에 영향을 미침 ⇢ 현재 설정에서는 max_acc(300)에서 가장 안정적인 요격 성능을 보임, 또한 N(navigation gain), tau(autopilot time constant), max_acc(maximum acceleration) 중 max_acc 변화에 따라 miss distance(직관적 성능 지표) 및 intercept probability(실무적 성능 지표) 값의 큰 변화가 있어 요격 성능에 가장 민감한 변수임을 알 수 있음
