@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from config import Config
 from simulation import Simulation
@@ -9,59 +8,48 @@ from models.target import Target3D
 
 from guidance.png import ProportionalNavigation3D
 from control.first_order_autopilot import FirstOrderAutopilot
+from sensor.seeker import PositionSeekerWithNoise
+from estimation.ekf import TargetStateEKF
 from analysis.metrics import compute_miss_distance
 
 
 def run_simulation(N):
-    # 설정 객체 생성
     config = Config()
     config.navigation_gain = N
 
-    # models(missile/target) 객체 생성
     missile = Missile3D([0, 0, 0], [300, 0, 0])
     target = Target3D([5000, 2000, 1000], [0, -200, 0])
 
-    # guidance/control 객체 생성
-    guidance = ProportionalNavigation3D(config.navigation_gain, config.max_acceleration)
+    guidance = ProportionalNavigation3D(
+        config.navigation_gain,
+        config.max_acceleration,
+    )
     controller = FirstOrderAutopilot(tau=0.15)
 
-    # 시뮬레이션 실행
-    sim = Simulation(missile, target, guidance, controller, config)
+    seeker = PositionSeekerWithNoise(pos_noise_std=5.0)
+
+    # 초기 EKF 상태: 대략적인 표적 초기 추정
+    x0 = [5000, 2000, 1000, 0, -200, 0]
+    estimator = TargetStateEKF(x0=x0, q=1.0, r=25.0)
+
+    sim = Simulation(
+        missile,
+        target,
+        guidance,
+        controller,
+        config,
+        seeker=seeker,
+        estimator=estimator,
+    )
     history = sim.run()
 
-    # 오차 계산
     missile_traj = np.array(history["missile"])
     target_traj = np.array(history["target"])
 
-    miss_distance = compute_miss_distance(missile_traj, target_traj, config.dt)
+    miss_distance = compute_miss_distance(
+        missile_traj,
+        target_traj,
+        config.dt,
+    )
 
     return missile_traj, target_traj, miss_distance
-
-def main():
-    gains = [1, 2, 3, 4, 5, 6]
-    results = []
-
-    plt.figure(figsize=(8,6))
-
-    for N in gains:
-        missile_traj, target_traj, miss = run_simulation(N)
-        results.append((N, miss))
-
-        plt.plot(missile_traj[:,0], missile_traj[:,1], label=f"N={N}")
-
-    plt.plot(target_traj[:,0], target_traj[:,1], 'k--', label="Target")
-
-    plt.legend()
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.title("Trajectory vs Navigation Gain")
-    plt.axis("equal")
-    plt.show()
-
-    print("=== Miss Distance Results ===")
-    for N, miss in results:
-        print(f"N={N} → Miss Distance: {miss:.2f} m")
-
-
-if __name__ == "__main__":
-    main()

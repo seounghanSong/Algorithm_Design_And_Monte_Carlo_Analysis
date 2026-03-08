@@ -9,6 +9,8 @@ from models.target import Target3D
 
 from guidance.png import ProportionalNavigation3D
 from control.first_order_autopilot import FirstOrderAutopilot
+from sensor.seeker import PositionSeekerWithNoise
+from estimation.ekf import TargetStateEKF
 
 from analysis.metrics import compute_miss_distance
 
@@ -38,6 +40,17 @@ def sample_case():
         "navigation_gain": np.random.uniform(2.5, 4.5),
         "max_acceleration": np.random.uniform(250.0, 450.0),
         "tau": np.random.uniform(0.03, 0.07),
+
+        # sensor noise
+        "pos_noise_std": np.random.uniform(1.0, 10.0),
+        "vel_noise_std": np.random.uniform(0.5, 5.0),
+
+        # EKF param
+        "ekf_q": np.random.uniform(0.1, 5.0),
+        "ekf_r": np.random.uniform(4.0, 100.0),
+        "ekf_init_pos_error_std": np.random.uniform(0.0, 100.0),
+        "ekf_init_vel_error_std": np.random.uniform(0.0, 20.0),
+
         "success_threshold": 5.0,
     }
 
@@ -52,7 +65,32 @@ def run_single_simulation(config, case):
 
     controller = FirstOrderAutopilot(tau=case["tau"])
 
-    sim = Simulation(missile, target, guidance, controller, config)
+    # sensor 생성
+    seeker = PositionSeekerWithNoise(
+        pos_noise_std=case["pos_noise_std"]
+    )
+
+    # EKF 초기 상태 설정
+    ekf_init_pos = np.array(case["target_pos"]) + np.random.normal(0, case["ekf_init_pos_error_std"], 3)
+    ekf_init_vel = np.array(case["target_vel"]) + np.random.normal(0, case["ekf_init_vel_error_std"], 3)
+    x0 = np.concatenate([ekf_init_pos, ekf_init_vel])
+
+    estimator = TargetStateEKF(
+        x0=x0,
+        q=case["ekf_q"],
+        r=case["ekf_r"],
+    )
+
+    # simulation 실행
+    sim = Simulation(
+        missile,
+        target,
+        guidance,
+        controller,
+        config,
+        seeker=seeker,
+        estimator=estimator,
+    )
     history = sim.run()
 
     missile_traj = np.array(history["missile"])
@@ -74,6 +112,11 @@ def run_single_simulation(config, case):
         "navigation_gain": case["navigation_gain"],
         "max_acceleration": case["max_acceleration"],
         "tau": case["tau"],
+        "pos_noise_std": case["pos_noise_std"],
+        "ekf_q": case["ekf_q"],
+        "ekf_r": case["ekf_r"],
+        "ekf_init_pos_error_std": case["ekf_init_pos_error_std"],
+        "ekf_init_vel_error_std": case["ekf_init_vel_error_std"],
     }
 
 def summarize_results(results):
@@ -98,10 +141,14 @@ def plot_results(results):
     miss = np.array([r["miss_distance"] for r in results])
     n_values = np.array([r["navigation_gain"] for r in results])
     max_acc_values = np.array([r["max_acceleration"] for r in results])
+    tau_values = np.array([r["tau"] for r in results])
+    pos_noise_values = np.array([r["pos_noise_std"] for r in results])
+    ekf_q_values = np.array([r["ekf_q"] for r in results])
+    ekf_r_values = np.array([r["ekf_r"] for r in results])
 
     plt.figure()
     plt.hist(miss, bins=30)
-    plt.xlabel("Miss Distance (m)")
+    plt.xlabel("Miss Distance(m)")
     plt.ylabel("Count")
     plt.title("Monte Carlo Miss Distance Distribution")
     plt.show()
@@ -109,15 +156,45 @@ def plot_results(results):
     plt.figure()
     plt.scatter(n_values, miss, s=10)
     plt.xlabel("Navigation Gain")
-    plt.ylabel("Miss Distance (m)")
+    plt.ylabel("Miss Distance(m)")
     plt.title("Miss Distance vs Navigation Gain")
     plt.show()
 
     plt.figure()
     plt.scatter(max_acc_values, miss, s=10)
-    plt.xlabel("Max Acceleration (m/s^2)")
-    plt.ylabel("Miss Distance (m)")
+    plt.xlabel("Max Acceleration(m/s^2)")
+    plt.ylabel("Miss Distance(m)")
     plt.title("Miss Distance vs Max Acceleration")
+    plt.show()
+
+    plt.figure()
+    plt.scatter(tau_values, miss, s=10)
+    plt.xlabel("Autopilot Time Constant(tau)")
+    plt.ylabel("Miss Distance(m)")
+    plt.title("Miss Distance vs Tau")
+    plt.show()
+
+    plt.figure()
+    plt.scatter(pos_noise_values, miss, s=10)
+    plt.xlabel("Position Noise STD")
+    plt.ylabel("Miss Distance(m)")
+    plt.title("Miss Distance vs Position Noise STD")
+    plt.show()
+
+    plt.figure()
+    plt.scatter(ekf_q_values, miss, s=10)
+    plt.xscale("log")
+    plt.xlabel("EKF q")
+    plt.ylabel("Miss Distance(m)")
+    plt.title("Miss Distance vs EKF q")
+    plt.show()
+
+    plt.figure()
+    plt.scatter(ekf_r_values, miss, s=10)
+    plt.xscale("log")
+    plt.xlabel("EKF r")
+    plt.ylabel("Miss Distance(m)")
+    plt.title("Miss Distance vs EKF r")
     plt.show()
 
 def plot_grouped_results(grouped_results, variable_name):
@@ -163,7 +240,7 @@ def summarize_grouped_results(grouped_results, variable_name):
         success = np.array([r["success"] for r in results])
         intercept_time = np.array([r["intercept_time"] for r in results])
 
-        print(f"Runs               : {len(grouped_results)}")
+        print(f"Runs               : {len(results)}")
         print(f"Mean miss distance : {np.mean(miss):.2f} m")
         print(f"Std  miss distance : {np.std(miss):.2f} m")
         print(f"Median miss        : {np.median(miss):.2f} m")
@@ -236,7 +313,6 @@ def monte_carlo_by_tau(tau_values, num_runs=200, seed=42):
 
     return grouped_results
 
-
 # max_acc의 순수 영향 비교可
 def monte_carlo_by_max_acc(acc_values, num_runs=200, seed=42):
     np.random.seed(seed)
@@ -259,9 +335,98 @@ def monte_carlo_by_max_acc(acc_values, num_runs=200, seed=42):
 
     return grouped_results
 
+# position_noise의 순수 영향 비교可
+def monte_carlo_by_position_noise(noise_values, num_runs=200, seed=42):
+    np.random.seed(seed)
+    config = Config()
+    grouped_results = {}
+
+    for noise in noise_values:
+        group = []
+
+        for _ in range(num_runs):
+            case = sample_case()
+            case["pos_noise_std"] = noise
+            result = run_single_simulation(config, case)
+            group.append(result)
+
+        grouped_results[noise] = group
+
+    summarize_grouped_results(grouped_results, "pos_noise_std")
+    plot_grouped_results(grouped_results, "pos_noise_std")
+
+    return grouped_results
+
+# velocity_noise의 순수 영향 비교可
+def monte_carlo_by_velocity_noise(noise_values, num_runs=200, seed=42):
+    np.random.seed(seed)
+    config = Config()
+    grouped_results = {}
+
+    for noise in noise_values:
+        group = []
+
+        for _ in range(num_runs):
+            case = sample_case()
+            case["vel_noise_std"] = noise
+            result = run_single_simulation(config, case)
+            group.append(result)
+
+        grouped_results[noise] = group
+
+    summarize_grouped_results(grouped_results, "vel_noise_std")
+    plot_grouped_results(grouped_results, "vel_noise_std")
+
+    return grouped_results
+
+# ekf_q의 순수 영향 비교可
+def monte_carlo_by_ekf_q(q_values, num_runs=200, seed=42):
+    np.random.seed(seed)
+    config = Config()
+    grouped_results = {}
+
+    for q in q_values:
+        group = []
+
+        for _ in range(num_runs):
+            case = sample_case()
+            case["ekf_q"] = q
+            result = run_single_simulation(config, case)
+            group.append(result)
+
+        grouped_results[q] = group
+
+    summarize_grouped_results(grouped_results, "ekf_q")
+    plot_grouped_results(grouped_results, "ekf_q")
+
+    return grouped_results
+
+# ekf_r의 순수 영향 비교可
+def monte_carlo_by_ekf_r(r_values, num_runs=200, seed=42):
+    np.random.seed(seed)
+    config = Config()
+    grouped_results = {}
+
+    for r in r_values:
+        group = []
+
+        for _ in range(num_runs):
+            case = sample_case()
+            case["ekf_r"] = r
+            result = run_single_simulation(config, case)
+            group.append(result)
+
+        grouped_results[r] = group
+
+    summarize_grouped_results(grouped_results, "ekf_r")
+    plot_grouped_results(grouped_results, "ekf_r")
+
+    return grouped_results
+
+
 if __name__ == "__main__":
-    # # 전체 시스템 Rubustness 시뮬레이션
-    # monte_carlo(500, 42)
+    # 전체 시스템 Rubustness 시뮬레이션
+    monte_carlo(500, 42)
 
     # # navigation gain 독립 영향 시뮬레이션
     # monte_carlo_by_navigation_gain(n_values=[1, 2, 3, 4, 5, 6], num_runs=200, seed=42)
@@ -269,5 +434,17 @@ if __name__ == "__main__":
     # # tau 독립 영향 시뮬레이션
     # monte_carlo_by_tau(tau_values=[0.02, 0.04, 0.06, 0.08, 0.10], num_runs=200, seed=42)
 
-    # max_acc 독립 영향 시뮬레이션
-    monte_carlo_by_max_acc(acc_values=[100, 200, 300, 400, 500], num_runs=200, seed=42)
+    # # max_acc 독립 영향 시뮬레이션
+    # monte_carlo_by_max_acc(acc_values=[100, 200, 300, 400, 500], num_runs=200, seed=42)
+
+    # # position_noise 독립 영향 시뮬레이션
+    # monte_carlo_by_position_noise(noise_values=[0, 0.5, 1, 2, 5, 10], num_runs=200, seed=42)
+
+    # # velocity_noise 독립 영향 시뮬레이션
+    # monte_carlo_by_velocity_noise(noise_values=[0, 0.2, 0.5, 1], num_runs=200, seed=42)
+
+    # # ekf_q 독립 영향 시뮬레이션(baseline 주변)
+    # monte_carlo_by_ekf_q(q_values=[0.1, 0.5, 1.0, 2.0, 5.0], num_runs=200, seed=42)
+
+    # # ekf_r 독립 영향 시뮬레이션(2m~10m 위치 오차 범위)
+    # monte_carlo_by_ekf_r(r_values=[4, 9, 25, 49, 100], num_runs=200, seed=42)
